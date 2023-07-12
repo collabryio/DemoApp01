@@ -134,17 +134,17 @@
 
 ;order informations schema
 (def orderinformation-schema
-  [{:db/ident       :rfpinformation/number
+  [{:db/ident       :rfp/id
     :db/valueType   :db.type/long
     :db/unique      :db.unique/identity
     :db/cardinality :db.cardinality/one}
-   {:db/ident       :rfpinformation/category
+   {:db/ident       :rfp/category
     :db/valueType   :db.type/ref
     :db/cardinality :db.cardinality/many}
-   {:db/ident       :rfpinformation/name
+   {:db/ident       :rfp/name
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one}
-   {:db/ident       :rfpinformation/explanation
+   {:db/ident       :rfp/explanation
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one}
    ])
@@ -152,10 +152,10 @@
 (def db (d/db conn))
 
 (defn add-order-info [number category name explanation]
-  (d/transact conn {:tx-data [{:rfpinformation/number      number
-                               :rfpinformation/category    category
-                               :rfpinformation/name        name
-                               :rfpinformation/explanation explanation
+  (d/transact conn {:tx-data [{:rfp/id          number
+                               :rfp/category    category
+                               :rfp/name        name
+                               :rfp/explanation explanation
                                }
                               ]})
   (def db (d/db conn))
@@ -262,10 +262,10 @@
 (add-new-supplier 6 "F konaklama" "kt2@gmail.com" "123456789000" "someone" [:category/konaklama])
 
 
-(add-supplier-offer 1 [:supplier/id 1] 150000 [:rfpinformation/number 1])
-(add-supplier-offer 2 [:supplier/id 2] 170000 [:rfpinformation/number 1])
-(add-supplier-offer 3 [:supplier/id 3] 140000 [:rfpinformation/number 1])
-(add-supplier-offer 4 [:supplier/id 4] 140300 [:rfpinformation/number 2])
+(add-supplier-offer 1 [:supplier/id 1] 150000 [:rfp/id 1])
+(add-supplier-offer 2 [:supplier/id 2] 170000 [:rfp/id 1])
+(add-supplier-offer 3 [:supplier/id 3] 140000 [:rfp/id 1])
+(add-supplier-offer 4 [:supplier/id 4] 140300 [:rfp/id 2])
 
 
 (d/q

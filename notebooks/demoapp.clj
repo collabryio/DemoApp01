@@ -124,17 +124,17 @@
 
 ;order informations schema
 (def orderinformation-schema
-  [{:db/ident       :rfpinformation/number
+  [{:db/ident       :rfp/id
     :db/valueType   :db.type/long
     :db/unique      :db.unique/identity
     :db/cardinality :db.cardinality/one}
-   {:db/ident       :rfpinformation/category
+   {:db/ident       :rfp/category
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one}
-   {:db/ident       :rfpinformation/name
+   {:db/ident       :rfp/name
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one}
-   {:db/ident       :rfpinformation/explanation
+   {:db/ident       :rfp/explanation
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one}
    ])
@@ -142,10 +142,10 @@
 (def db (d/db conn))
 
 (defn add-order-info [number category name explanation]
-  (d/transact conn {:tx-data [{:rfpinformation/number      number
-                               :rfpinformation/category    category
-                               :rfpinformation/name        name
-                               :rfpinformation/explanation explanation
+  (d/transact conn {:tx-data [{:rfp/id          number
+                               :rfp/category    category
+                               :rfp/name        name
+                               :rfp/explanation explanation
                                }
                               ]})
   (def db (d/db conn))
@@ -284,7 +284,7 @@
 (d/q
   '[:find (pull ?e [*])
     :where
-    [?e :rfpinformation/number _]]
+    [?e :rfp/id _]]
   db)
 
 (d/q

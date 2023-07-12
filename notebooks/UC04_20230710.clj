@@ -1,7 +1,4 @@
-(ns konaklamaprojesi)
-
-
-
+(ns UC04-20230710)
 
 (require '[datomic.client.api :as d])
 (def client (d/client {:server-type :dev-local
@@ -27,9 +24,12 @@
     :db/valueType   :db.type/long
     :db/unique      :db.unique/identity
     :db/cardinality :db.cardinality/one}
+   {:db/ident       :user/username
+    :db/valueType   :db.type/string
+    :db/cardinality :db.cardinality/one}
    {:db/ident       :user/name
     :db/valueType   :db.type/string
-    :db/cardinality :db.cardinality/many}
+    :db/cardinality :db.cardinality/one}
    {:db/ident       :user/password
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one}])
@@ -37,9 +37,10 @@
 (def db (d/db conn))                                        ;;refresh database
 
 
-(defn add-new-user [user-id username password-string]
+(defn add-new-user [user-id name username password-string]
   (d/transact conn {:tx-data [{:user/id       user-id
-                               :user/name     username
+                               :user/username username
+                               :user/name     name
                                :user/password password-string}
                               ]})
   (def db (d/db conn))
@@ -53,16 +54,19 @@
     :db/valueType   :db.type/long
     :db/unique      :db.unique/identity
     :db/cardinality :db.cardinality/one}
-   {:db/ident       :supplier/label
+   {:db/ident       :supplier/brand-name
+    :db/valueType   :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident       :supplier/company-name
+    :db/valueType   :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident       :supplier/responsible-person-name
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one}
    {:db/ident       :supplier/email
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one}
-   {:db/ident       :supplier/phonenumber
-    :db/valueType   :db.type/string
-    :db/cardinality :db.cardinality/many}
-   {:db/ident       :supplier/responsibleperson
+   {:db/ident       :supplier/phone-number
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/many}
    {:db/ident       :supplier/category
@@ -72,13 +76,14 @@
 (def db (d/db conn))                                        ;;refresh database
 
 
-(defn add-new-supplier [id label email phonenumber responsibleperson category]
-  (d/transact conn {:tx-data [{:supplier/id                id
-                               :supplier/label             label
-                               :supplier/email             email
-                               :supplier/phonenumber       phonenumber
-                               :supplier/responsibleperson responsibleperson
-                               :supplier/category          category
+(defn add-new-supplier [id brand-name company-name responsible-person-name email phonenumber category]
+  (d/transact conn {:tx-data [{:supplier/id                      id
+                               :supplier/brand-name              brand-name
+                               :supplier/company-name            company-name
+                               :supplier/responsible-person-name responsible-person-name
+                               :supplier/email                   email
+                               :supplier/phone-number            phonenumber
+                               :supplier/category                category
                                }
                               ]})
   (def db (d/db conn))
@@ -88,50 +93,59 @@
 
 ;project general informations schema
 (def pgi-schema
-  [{:db/ident       :pgi/id
+  [{:db/ident       :project/id
     :db/valueType   :db.type/long
     :db/unique      :db.unique/identity
-    :db/cardinality :db.cardinality/one}
-   {:db/ident       :pgi/username
+    :db/cardinality :db.cardinality/one
+    :db/doc         "project general information"}
+   {:db/ident       :project/username
     :db/valueType   :db.type/ref
-    :db/cardinality :db.cardinality/one}
-   {:db/ident       :pgi/clientname
+    :db/cardinality :db.cardinality/one
+    :db/doc         "project general information"}
+   {:db/ident       :project/client-name
     :db/valueType   :db.type/string
-    :db/cardinality :db.cardinality/one}
-   {:db/ident       :pgi/phone
+    :db/cardinality :db.cardinality/one
+    :db/doc         "project general information"}
+   {:db/ident       :project/phone
     :db/valueType   :db.type/string
-    :db/cardinality :db.cardinality/one}
-   {:db/ident       :pgi/projectname
+    :db/cardinality :db.cardinality/one
+    :db/doc         "project general information"}
+   {:db/ident       :project/project-title
     :db/valueType   :db.type/string
-    :db/cardinality :db.cardinality/one}
-   {:db/ident       :pgi/projectstartingdate
+    :db/cardinality :db.cardinality/one
+    :db/doc         "project general information"}
+   {:db/ident       :project/start-date
     :db/valueType   :db.type/string
-    :db/cardinality :db.cardinality/one}
-   {:db/ident       :pgi/projectfinishingdate
+    :db/cardinality :db.cardinality/one
+    :db/doc         "project general information"}
+   {:db/ident       :project/finish-date
     :db/valueType   :db.type/string
-    :db/cardinality :db.cardinality/one}
-   {:db/ident       :pgi/documents
+    :db/cardinality :db.cardinality/one
+    :db/doc         "project general information"}
+   {:db/ident       :project/documents
     :db/valueType   :db.type/string
-    :db/cardinality :db.cardinality/many}
+    :db/cardinality :db.cardinality/many
+    :db/doc         "project general information"}
    ])
 (d/transact conn {:tx-data pgi-schema})
 (def db (d/db conn))
 
-(defn add-pgi-info [id username clientname clientphonenumber projectname projectstartingdate projectfinishingdate documents]
-  (d/transact conn {:tx-data [{:pgi/id                   id
-                               :pgi/username             username
-                               :pgi/clientname           clientname
-                               :pgi/phone                clientphonenumber
-                               :pgi/projectname          projectname
-                               :pgi/projectstartingdate  projectstartingdate
-                               :pgi/projectfinishingdate projectfinishingdate
-                               :pgi/documents            documents
+(defn add-pgi-info [id username clientname clientphonenumber projecttitle projectstartingdate projectfinishingdate documents]
+  (d/transact conn {:tx-data [{:project/id            id
+                               :project/username      username
+                               :project/client-name   clientname
+                               :project/phone         clientphonenumber
+                               :project/project-title projecttitle
+                               :project/start-date    projectstartingdate
+                               :project/finish-date   projectfinishingdate
+                               :project/documents     documents
                                }
                               ]})
   (def db (d/db conn))
   )
 
 ;order informations schema
+
 (def orderinformation-schema
   [{:db/ident       :rfp/id
     :db/valueType   :db.type/long
@@ -183,34 +197,32 @@
 (d/transact conn {:tx-data selected-supplierinformation-schema})
 (def db (d/db conn))
 
-(defn add-selected-supplier-info [supplierid suppliername supplierphonenumber supplieremail category]
-  (d/transact conn {:tx-data [{:supplierinformation/supplierid          supplierid
-                               :supplierinformation/suppliername        suppliername
-                               :supplierinformation/supplierphonenumber supplierphonenumber
-                               :supplierinformation/supplieremail       supplieremail
-                               :supplierinformation/category            category
-                               }
-                              ]})
-  (def db (d/db conn))
-  )
-
-
-;order informations schema
+;offer informations schema
 (def offer-schema
-  [{:db/ident       :proposal/supplierid
+  [{:db/ident       :proposal/proposalid
+    :db/valueType   :db.type/long
+    :db/unique      :db.unique/identity
+    :db/cardinality :db.cardinality/one}
+   {:db/ident       :proposal/supplierid
     :db/valueType   :db.type/ref
     :db/unique      :db.unique/identity
     :db/cardinality :db.cardinality/one}
    {:db/ident       :proposal/price
     :db/valueType   :db.type/long
     :db/cardinality :db.cardinality/one}
+   {:db/ident       :proposal/rfpid
+    :db/valueType   :db.type/ref
+    :db/unique      :db.unique/identity
+    :db/cardinality :db.cardinality/many}
    ])
 (d/transact conn {:tx-data offer-schema})
 (def db (d/db conn))
 
-(defn add-supplier-offer [supplierid supplieroffer]
-  (d/transact conn {:tx-data [{:proposal/supplierid supplierid
+(defn add-supplier-offer [offerid supplierid supplieroffer orderid]
+  (d/transact conn {:tx-data [{:proposal/proposalid offerid
+                               :proposal/supplierid supplierid
                                :proposal/price      supplieroffer
+                               :proposal/rfpid      orderid
                                }
                               ]})
   (def db (d/db conn))
@@ -219,13 +231,7 @@
 ;1-Satın alma uzmanı, ''şirket çalışanları için seyahat ve konaklama'' projesi oluşturmak için kullanıcı adı ve şifresiyle sisteme giriş yapar.
 
 ;1a; kullanıcı oluştur
-(add-new-user 1 "buse" "123456")
-
-;1b; add new suppliers
-
-(add-new-supplier 1 "pegasus" "pgs@gmail.com" "123456789000" "someone" [:category/seyahat :category/lojistik :category/konaklama])
-(add-new-supplier 2 "hilton" "hilton@gmail.com" "123456789000" "someone" [:category/konaklama :category/seyahat])
-
+(add-new-user 1 "buse" "saubuse" "123456")
 
 
 ;2-Satın alma uzmanı, ''proje oluştur'' butonuna tıklar.
@@ -254,79 +260,51 @@
 ;-Hizmet İsmi (Örn: seyahat, konaklama desteği, global lojistik desteği)
 ;-Hizmet açıklaması (Örn: 50 adet oda, 50 adet uçak bileti, 50 adet karayolu lojistik aracı)
 
-(add-order-info 1 [:category/seyahat :category/konaklama] "seyahat, konaklama desteği, global lojistik desteği" "50 adet oda, 50 adet uçak bileti, 50 adet karayolu lojistik aracı")
+(add-order-info 1 [:category/seyahat] "konaklama desteği" "50 adet uçak bileti")
+(add-order-info 2 [:category/konaklama] "seyehat desteği" "50 adet oda")
 
 ;8-Satın alma uzmanı, ileri butonuna tıklar ve sonraki aşamaya geçer.
-;
-;9-Sistem, aplikasyonunda kayıtlı olan bütün tedarikçileri sıralar. Satın alma uzmanı bu tedarikçileri seçebilir ve kendi tedarikçi ekleyebilir. Tedarikçi eklerken şu bilgileri girer:
-;-Tedarikçi numarası (Örn: 1)
-;-Tedarikçi ismi (Örn: Hilton otel, Sueno otel, Garden otel, Türk Hava Yolları, Pegasus, Anadolu Jet, msa taşımacılık, Ekol lojistik, Borusan Lojistik)
-;-Tedarikçi telefon numarası (05534532113)
-;-Tedarikçi emaili (hilton@gmail.com, sueno@gmail.com, garden@gmail.com, thy@gmail.com, pegasus@gmail.com, anadolujet@gmail.com)
-;-Yetkili kişi (Özlem hanım, Funda hanım, Orhan bey, Dilek hanım)
 
-(def get-free-supplier-id (+ 1 (ffirst (take 1 (reverse (->> (d/q
-                                                               '[:find ?e
-                                                                 :where
-                                                                 [_ :supplier/id ?e]]
-                                                               db)
-                                                             (sort-by last)
-                                                             )
-                                                        )
-                                             )
-                                       )
-                             )
-  )
+;1b; add new suppliers
+
+(add-new-supplier 1 "A brand" "A seyahat" "responsible person" "kt1@gmail.com" "123456789000" [:category/seyahat])
+(add-new-supplier 2 "B brand" "B seyahat" "responsible person" "kt1@gmail.com" "123456789000" [:category/seyahat])
+(add-new-supplier 3 "C brand" "C seyahat" "responsible person" "kt1@gmail.com" "123456789000" [:category/seyahat])
+(add-new-supplier 4 "D brand" "D konaklama" "responsible person" "kt2@gmail.com" "123456789000" [:category/konaklama])
+(add-new-supplier 5 "E brand" "E konaklama" "responsible person" "kt2@gmail.com" "123456789000" [:category/konaklama])
+(add-new-supplier 6 "F brand" "F konaklama" "responsible person" "kt2@gmail.com" "123456789000" [:category/konaklama])
 
 
-(add-new-supplier get-free-supplier-id "Türk Hava Yolları" "thy@gmail.com" "05534532113" "someone" [:category/seyahat :category/konaklama])
-
-(add-supplier-offer [:supplier/id 1] 150000)
-(add-supplier-offer [:supplier/id 2] 170000)
-(add-supplier-offer [:supplier/id 3] 140000)
-
-
-;10-Satın alma uzmanı, uygun bulduğu tedarikçileri seçer ve kaydet butonuna tıklar.
-;
-;12-Sistem, kullanıcının proje hakkında girdiği tüm bilgileri ''ön izleme ekranında'' gösterir.
-;4.adımdaki genel bilgiler
-;7.adımdaki sipariş bilgileri
-;10.adımdaki tedarikçi bilgileri
-
-;12-Sistem, kullanıcının proje hakkında girdiği tüm bilgileri ''ön izleme
-;ekranında'' gösterir.
+(add-supplier-offer 1 [:supplier/id 1] 150000 [:rfp/id 1])
+(add-supplier-offer 2 [:supplier/id 2] 170000 [:rfp/id 1])
+(add-supplier-offer 3 [:supplier/id 3] 140000 [:rfp/id 1])
+(add-supplier-offer 4 [:supplier/id 4] 140300 [:rfp/id 2])
 
 
 (d/q
-  '[:find (pull ?e [*])
+  '[:find ?e
     :where
-    [?e :pgi/id _]]
+    [?e :proposal/rfpid _]
+    ]
   db)
 
 (d/q
   '[:find (pull ?e [*])
     :where
-    [?e :rfp/id _]]
-  db)
-
-(d/q
-  '[:find (pull ?e [*])
-    :where
-    [?e :supplier/id _]]
+    [?e :proposal/rfpid _]
+    ]
   db)
 
 
 
-(take 1 (->> (d/q
-               '[:find ?si ?p
-                 :where
-                 [?e :proposal/supplierid ?s]
-                 [?s :supplier/label ?si]
-                 [?e :proposal/price ?p]]
-               db)
-             (sort-by last)
-             )
-      )
-
+(->> (d/q
+       '[:find ?si ?p
+         :where
+         [?e :proposal/supplierid ?s]
+         [?s :supplier/label ?si]
+         [?e :proposal/price ?p]]
+       db)
+     (sort-by last)
+     )
 
 
