@@ -1,4 +1,4 @@
-(ns UC04)
+(ns UC0420230713)
 
 (require '[datomic.client.api :as d])
 (def client (d/client {:server-type :dev-local
@@ -18,11 +18,6 @@
              {:db/ident :category/mobilya}]})
 (def db (d/db conn))                                        ;;refresh database
 
-(d/transact
-  conn
-  {:tx-data [{:db/ident :category/supplier}
-             {:db/ident :category/client}]})
-
 ;create user schema
 (def user-schema
   [{:db/ident       :user/id
@@ -37,20 +32,16 @@
     :db/cardinality :db.cardinality/one}
    {:db/ident       :user/password
     :db/valueType   :db.type/string
-    :db/cardinality :db.cardinality/one}
-   {:db/ident       :user/company-id
-    :db/valueType   :db.type/ref
     :db/cardinality :db.cardinality/one}])
 (d/transact conn {:tx-data user-schema})
 (def db (d/db conn))                                        ;;refresh database
 
 
-(defn add-new-user [user-id name username password-string company-id]
-  (d/transact conn {:tx-data [{:user/id         user-id
-                               :user/username   username
-                               :user/name       name
-                               :user/password   password-string
-                               :user/company-id company-id}
+(defn add-new-user [user-id name username password-string]
+  (d/transact conn {:tx-data [{:user/id       user-id
+                               :user/username username
+                               :user/name     name
+                               :user/password password-string}
                               ]})
   (def db (d/db conn))
   )
@@ -58,7 +49,7 @@
 
 
 ;create supplier schema
-(def company-schema
+(def supplier-schema
   [{:db/ident       :supplier/id
     :db/valueType   :db.type/long
     :db/unique      :db.unique/identity
@@ -80,23 +71,19 @@
     :db/cardinality :db.cardinality/many}
    {:db/ident       :supplier/category
     :db/valueType   :db.type/ref
-    :db/cardinality :db.cardinality/many}
-   {:db/ident       :company/type
-    :db/valueType   :db.type/ref
     :db/cardinality :db.cardinality/many}])
-(d/transact conn {:tx-data company-schema})
+(d/transact conn {:tx-data supplier-schema})
 (def db (d/db conn))                                        ;;refresh database
 
 
-(defn add-new-supplier [id brand-name company-name responsible-person-name email phone-number category type]
-  (d/transact conn {:tx-data [{:company/id                      id
-                               :company/brand-name              brand-name
-                               :company/company-name            company-name
-                               :company/responsible-person-name responsible-person-name
-                               :company/email                   email
-                               :company/phone-number            phone-number
-                               :company/category                category
-                               :company/type                    type
+(defn add-new-supplier [id brand-name company-name responsible-person-name email phonenumber category]
+  (d/transact conn {:tx-data [{:supplier/id                      id
+                               :supplier/brand-name              brand-name
+                               :supplier/company-name            company-name
+                               :supplier/responsible-person-name responsible-person-name
+                               :supplier/email                   email
+                               :supplier/phone-number            phonenumber
+                               :supplier/category                category
                                }
                               ]})
   (def db (d/db conn))
@@ -105,7 +92,7 @@
 
 
 ;project general informations schema
-(def project-schema
+(def pgi-schema
   [{:db/ident       :project/id
     :db/valueType   :db.type/long
     :db/unique      :db.unique/identity
@@ -140,7 +127,7 @@
     :db/cardinality :db.cardinality/many
     :db/doc         "project general information"}
    ])
-(d/transact conn {:tx-data project-schema})
+(d/transact conn {:tx-data pgi-schema})
 (def db (d/db conn))
 
 (defn add-pgi-info [id username clientname clientphonenumber projecttitle projectstartingdate projectfinishingdate documents]
@@ -173,19 +160,15 @@
    {:db/ident       :rfp/explanation
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one}
-   {:db/ident       :rfp/client-id
-    :db/valueType   :db.type/ref
-    :db/cardinality :db.cardinality/one}
    ])
 (d/transact conn {:tx-data orderinformation-schema})
 (def db (d/db conn))
 
-(defn add-order-info [number category name explanation client-id]
+(defn add-order-info [number category name explanation]
   (d/transact conn {:tx-data [{:rfp/id          number
                                :rfp/category    category
                                :rfp/name        name
                                :rfp/explanation explanation
-                               :rfp/client-id   client-id
                                }
                               ]})
   (def db (d/db conn))
@@ -248,9 +231,7 @@
 ;1-Satın alma uzmanı, ''şirket çalışanları için seyahat ve konaklama'' projesi oluşturmak için kullanıcı adı ve şifresiyle sisteme giriş yapar.
 
 ;1a; kullanıcı oluştur
-(add-new-user 1 "buse" "saubuse" "123456" 1)
-(add-new-user 1 "buse" "saubuse" "123456" 2)
-(add-new-user 1 "buse" "saubuse" "123456" 5)
+(add-new-user 1 "buse" "saubuse" "123456")
 
 
 ;2-Satın alma uzmanı, ''proje oluştur'' butonuna tıklar.
@@ -279,19 +260,19 @@
 ;-Hizmet İsmi (Örn: seyahat, konaklama desteği, global lojistik desteği)
 ;-Hizmet açıklaması (Örn: 50 adet oda, 50 adet uçak bileti, 50 adet karayolu lojistik aracı)
 
-(add-order-info 1 [:category/seyahat] "konaklama desteği" "50 adet uçak bileti" 1)
-(add-order-info 2 [:category/konaklama] "seyehat desteği" "50 adet oda" 2)
+(add-order-info 1 [:category/seyahat] "konaklama desteği" "50 adet uçak bileti")
+(add-order-info 2 [:category/konaklama] "seyehat desteği" "50 adet oda")
 
 ;8-Satın alma uzmanı, ileri butonuna tıklar ve sonraki aşamaya geçer.
 
-
 ;1b; add new suppliers
-(add-new-supplier 1 "A brand" "A seyahat" "responsible person" "kt1@gmail.com" "123456789000" [:category/seyahat] [:category/supplier])
-(add-new-supplier 2 "B brand" "B seyahat" "responsible person" "kt1@gmail.com" "123456789000" [:category/seyahat] [:category/supplier])
-(add-new-supplier 3 "C brand" "C seyahat" "responsible person" "kt1@gmail.com" "123456789000" [:category/seyahat] [:category/supplier])
-(add-new-supplier 4 "D brand" "D konaklama" "responsible person" "kt2@gmail.com" "123456789000" [:category/konaklama] [:category/supplier])
-(add-new-supplier 5 "E brand" "E konaklama" "responsible person" "kt2@gmail.com" "123456789000" [:category/konaklama] [:category/supplier])
-(add-new-supplier 6 "F brand" "F konaklama" "responsible person" "kt2@gmail.com" "123456789000" [:category/konaklama] [:category/supplier])
+
+(add-new-supplier 1 "A brand" "A seyahat" "responsible person" "kt1@gmail.com" "123456789000" [:category/seyahat])
+(add-new-supplier 2 "B brand" "B seyahat" "responsible person" "kt1@gmail.com" "123456789000" [:category/seyahat])
+(add-new-supplier 3 "C brand" "C seyahat" "responsible person" "kt1@gmail.com" "123456789000" [:category/seyahat])
+(add-new-supplier 4 "D brand" "D konaklama" "responsible person" "kt2@gmail.com" "123456789000" [:category/konaklama])
+(add-new-supplier 5 "E brand" "E konaklama" "responsible person" "kt2@gmail.com" "123456789000" [:category/konaklama])
+(add-new-supplier 6 "F brand" "F konaklama" "responsible person" "kt2@gmail.com" "123456789000" [:category/konaklama])
 
 
 (add-supplier-offer 1 [:supplier/id 1] 150000 [:rfp/id 1])

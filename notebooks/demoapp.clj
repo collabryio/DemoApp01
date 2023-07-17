@@ -154,17 +154,17 @@
 
 ;supplier informations schema
 (def selected-supplierinformation-schema
-  [{:db/ident       :supplierinformation/supplierid
+  [{:db/ident       :supplier/id
     :db/valueType   :db.type/long
     :db/unique      :db.unique/identity
     :db/cardinality :db.cardinality/one}
-   {:db/ident       :supplierinformation/suppliername
+   {:db/ident       :supplier/name
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one}
-   {:db/ident       :supplierinformation/supplierphonenumber
+   {:db/ident       :supplier/phone-number
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one}
-   {:db/ident       :supplierinformation/supplieremail
+   {:db/ident       :supplier/email
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one}
    ])
@@ -172,10 +172,10 @@
 (def db (d/db conn))
 
 (defn add-selected-supplier-info [supplierid suppliername supplierphonenumber supplieremail]
-  (d/transact conn {:tx-data [{:supplierinformation/supplierid          supplierid
-                               :supplierinformation/suppliername        suppliername
-                               :supplierinformation/supplierphonenumber supplierphonenumber
-                               :supplierinformation/supplieremail       supplieremail
+  (d/transact conn {:tx-data [{:supplier/id           supplierid
+                               :supplier/name         suppliername
+                               :supplier/phone-number supplierphonenumber
+                               :supplier/email        supplieremail
                                }
                               ]})
   (def db (d/db conn))
@@ -184,7 +184,7 @@
 
 ;order informations schema
 (def offer-schema
-  [{:db/ident       :proposal/supplierid
+  [{:db/ident       :proposal/supplier
     :db/valueType   :db.type/ref
     :db/unique      :db.unique/identity
     :db/cardinality :db.cardinality/one}
@@ -196,8 +196,8 @@
 (def db (d/db conn))
 
 (defn add-supplier-offer [supplierid supplieroffer]
-  (d/transact conn {:tx-data [{:proposal/supplierid supplierid
-                               :proposal/price      supplieroffer
+  (d/transact conn {:tx-data [{:proposal/supplier supplierid
+                               :proposal/price    supplieroffer
                                }
                               ]})
   (def db (d/db conn))
@@ -298,7 +298,7 @@
 (take 1 (->> (d/q
                '[:find ?si ?p
                  :where
-                 [?e :proposal/supplierid ?s]
+                 [?e :proposal/supplier ?s]
                  [?s :supplier/label ?si]
                  [?e :proposal/price ?p]]
                db)
