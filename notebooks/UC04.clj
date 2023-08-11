@@ -59,26 +59,26 @@
 
 ;create supplier schema
 (def company-schema
-  [{:db/ident       :supplier/id
+  [{:db/ident       :company/id
     :db/valueType   :db.type/long
     :db/unique      :db.unique/identity
     :db/cardinality :db.cardinality/one}
-   {:db/ident       :supplier/brand-name
+   {:db/ident       :company/brand-name
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one}
-   {:db/ident       :supplier/company-name
+   {:db/ident       :company/company-name
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one}
-   {:db/ident       :supplier/responsible-person-name
+   {:db/ident       :company/responsible-person-name
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one}
-   {:db/ident       :supplier/email
+   {:db/ident       :company/email
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/one}
-   {:db/ident       :supplier/phone-number
+   {:db/ident       :company/phone-number
     :db/valueType   :db.type/string
     :db/cardinality :db.cardinality/many}
-   {:db/ident       :supplier/category
+   {:db/ident       :company/category
     :db/valueType   :db.type/ref
     :db/cardinality :db.cardinality/many}
    {:db/ident       :company/type
