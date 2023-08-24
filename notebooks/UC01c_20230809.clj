@@ -1,5 +1,6 @@
 (ns UC01c_20230809)
-;usecase --->  UC 1.Yyeni downloads
+
+;rfr: 20230808-UC1c.pdf
 
 (require '[datomic.client.api :as d])
 (def client (d/client {:server-type :dev-local
@@ -28,7 +29,7 @@
 
 (d/transact
   conn
-  {:tx-data [{:db/ident :order-status/ongoing}
+  {:tx-data [{:db/ident :order-status/waiting}
              {:db/ident :order-status/done}
              {:db/ident :order-status/waiting}
              {:db/ident :order-status/declined}
@@ -234,7 +235,7 @@
 (add-new-company 1 "TEI" "info.tei@tei.com" "1234567890" [:service/konaklama])
 (add-new-company 2 "IBM" "info.ibm@ibm.com" "1234567890" [:service/bilgisayar])
 (add-new-company 3 "HP" "info.hp@hp.com" "1234567890" [:service/bilgisayar])
-(add-new-company 4 "Beyza yeni şirket" "beyzayeni@company.com" "1234567890" [:service/bilgisayar])
+(add-new-company 4 "apple" "apple@company.com" "1234567890" [:service/bilgisayar])
 
 (add-new-user 1 "user1" "123456" "Beyza" "Polatlı" [:company/id 1])
 (add-new-user 2 "user2" "123456" "Barış" "Can" [:company/id 2])
@@ -393,33 +394,40 @@
 ;15. Satın alma uzmanı, uygun bulduğu iki tedarikçiyle çalışmaya başlar ve
 ;sistem sipariş durumlarını takip etmesi için "sipariş ekranı" sunar.
 ;;;;;;;;;Burada satınalma uzman bir teklifi kabul etmeli
-(add-new-proposal 1 [:company/id 2] 110000 [:project/id 1] 10 :order-status/ongoing)
-(add-new-proposal 2 [:company/id 3] 119000 [:project/id 1] 10 :order-status/ongoing)
+(add-new-proposal 1 [:company/id 2] 110000 [:project/id 1] 10 :order-status/waiting)
+(add-new-proposal 2 [:company/id 3] 119000 [:project/id 1] 10 :order-status/waiting)
 
 
-(->> (d/q
-       '[:find ?si ?ia ?os ?p
-         :where
-         [?e :proposal/id _]
-         [?e :proposal/supplier-id ?s]
-         [?e :proposal/item-amount ?ia]
-         [?e :proposal/amount ?p]
-         [?e :proposal/order-status ?ps]
-         [?s :company/brand-name ?si]
-         [?ps :db/ident ?os]
-         ]
-       db)
-     (sort-by last)
-     )
+(def order-info-query
+  (->> (d/q
+         '[:find ?bn ?ia ?os ?p
+           :where
+           [?e :proposal/id _]
+           [?e :proposal/supplier-id ?si]
+           [?e :proposal/item-amount ?ia]
+           [?e :proposal/amount ?p]
+           [?e :proposal/order-status ?ps]
+           [?si :company/brand-name ?bn]
+           [?ps :db/ident ?os]
+           ]
+         db)
+       )
+  )
+(identity order-info-query)
 ;=>
-;(["IBM" 10 :order-status/ongoing 110000]    ----> teklif kabul edildi
-; ["HP" 10 :order-status/ongoing 119000]     ----> teklif kabul edildi
-; ["Beyza yeni şirket" 20 :order-status/waiting 239000])
+;[["IBM" 10 :order-status/ongoing 110000]
+; ["apple" 20 :order-status/waiting 239000]
+; ["HP" 10 :order-status/ongoing 119000]]
 
 
+(sort-by last (mapv (fn [x] (let [[_ c _ b] x] (conj [] x "Unit price:" (/ b c)))) order-info-query))
+;=>
+;(["IBM" 10 :order-status/ongoing 110000 "Unit price:" 11000]
+; ["HP" 10 :order-status/ongoing 119000 "Unit price:" 11900]
+; ["apple" 20 :order-status/waiting 239000 "Unit price:" 11950])
 
 
-;;;---------------- bitti
+  ;;;---------------- bitti
 
 
 

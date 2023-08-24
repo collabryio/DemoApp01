@@ -1,5 +1,6 @@
 (ns UC01a_20230804)
-;usecase --->  UC 1.a downloads
+
+;rfr: 20230806-UC1a.pdf
 
 (require '[datomic.client.api :as d])
 (def client (d/client {:server-type :dev-local
@@ -168,7 +169,7 @@
 (d/transact conn {:tx-data order-schema})
 (def db (d/db conn))
 
-(defn add-new-order [number category name explanation]
+(defn  add-new-order [number category name explanation]
   (d/transact conn {:tx-data [{:rfp/id          number
                                :rfp/category    category
                                :rfp/name        name
@@ -187,14 +188,12 @@
     :db/cardinality :db.cardinality/one}
    {:db/ident       :proposal/supplier-id
     :db/valueType   :db.type/ref
-    :db/unique      :db.unique/identity
     :db/cardinality :db.cardinality/one}
    {:db/ident       :proposal/amount
     :db/valueType   :db.type/long
     :db/cardinality :db.cardinality/one}
    {:db/ident       :proposal/project-id
     :db/valueType   :db.type/ref
-    :db/unique      :db.unique/identity
     :db/cardinality :db.cardinality/one}
    ])
 (d/transact conn {:tx-data proposal-schema})
@@ -247,10 +246,10 @@
 ;-Tedarikçi teklifi
 ;10. Satın alma uzmanı, tedarikçi kıyaslama ekranından uygun gördüğü tedarikçiyi seçer ve sistem tedarikçiye bildirir.
 (->> (d/q
-       '[:find ?si ?p
+       '[:find ?bn ?p
          :where
          [?e :proposal/supplier-id ?s]
-         [?s :company/brand-name ?si]
+         [?s :company/brand-name ?bn]
          [?e :proposal/amount ?p]]
        db)
      (sort-by last)

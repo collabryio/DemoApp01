@@ -1,5 +1,6 @@
 (ns UC01b_20230808)
-;usecase --->  UC 1.b downloads
+
+;rfr: 20230807-UC1b.pdf
 
 (require '[datomic.client.api :as d])
 (def client (d/client {:server-type :dev-local
@@ -28,7 +29,7 @@
 
 (d/transact
   conn
-  {:tx-data [{:db/ident :order-status/ongoing}
+  {:tx-data [{:db/ident :order-status/waiting}
              {:db/ident :order-status/done}
              {:db/ident :order-status/waiting}
              {:db/ident :order-status/declined}
@@ -232,28 +233,20 @@
     :db/valueType   :db.type/long
     :db/unique      :db.unique/identity
     :db/cardinality :db.cardinality/one}
-   {:db/ident       :cp/supplier-id
+   {:db/ident       :cp/proposal_id
     :db/valueType   :db.type/ref
     :db/cardinality :db.cardinality/one}
    {:db/ident       :cp/amount
     :db/valueType   :db.type/long
     :db/cardinality :db.cardinality/one}
-   {:db/ident       :cp/project-id
-    :db/valueType   :db.type/ref
-    :db/cardinality :db.cardinality/one}
-   {:db/ident       :cp/project-owner-id
-    :db/valueType   :db.type/ref
-    :db/cardinality :db.cardinality/one}
    ])
 (d/transact conn {:tx-data counter-proposal-schema})
 (def db (d/db conn))
 
-(defn add-new-cp [id supplier-id amount project-id project-owner-id]
+(defn add-new-cp [id proposal_id amount]
   (d/transact conn {:tx-data [{:cp/id               id
-                               :cp/supplier-id      supplier-id
+                               :cp/proposal_id      proposal_id
                                :cp/amount           amount
-                               :cp/project-id       project-id
-                               :cp/project-owner-id project-owner-id
                                }
                               ]})
   (def db (d/db conn))
@@ -349,7 +342,7 @@
 ;- Tedarikçi şirket ismi
 ;- Tedarikçi telefon numarası
 ;- E-posta
-(add-new-company 4 "Beyza yeni şirket" "beyzayeni@company.com" "1234567890" [:service/bilgisayar])
+(add-new-company 4 "apple" "apply@company.com" "1234567890" [:service/bilgisayar])
 
 
 
@@ -441,14 +434,14 @@
 ;- Tedarikçi ismi
 ;- Tedarikçi teklifi
 (->> (d/q
-       '[:find ?si ?ia  ?os ?p
+       '[:find ?bn ?ia  ?os ?p
          :where
          [?e :proposal/id _]
-         [?e :proposal/supplier-id ?s]
+         [?e :proposal/supplier-id ?si]
          [?e :proposal/item-amount ?ia]
          [?e :proposal/amount ?p]
          [?e :proposal/order-status ?ps]
-         [?s :company/brand-name ?si]
+         [?si :company/brand-name ?bn]
          [?ps :db/ident ?os]
          ]
        db)
@@ -464,7 +457,7 @@
 ;-Tedarikçi ismi
 ;-Tedarikçinin verdiği teklif
 ;-Satın alma uzmanının teklifi
-(add-new-cp 1 [:company/id 4] 129000 [:project/id 1] [:user/id 1])
+(add-new-cp 1 [:proposal/id 3] 129000)
 
 ;;------------------------------------XXXXX   OKEY   XXXXX------------------------------------
 
